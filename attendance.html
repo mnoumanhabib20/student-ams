@@ -31,7 +31,15 @@
           <section class="register-filters card">
             <label class="field-group"><span>Class</span><select aria-label="Select a class" data-register-class disabled><option value="">Loading classes…</option></select></label>
             <label class="field-group"><span>Date</span><input type="date" aria-label="Attendance date" data-register-date></label>
+            <label class="field-group"><span>Subject</span><select aria-label="Select a subject" data-register-subject disabled><option value="">Select a class first</option></select></label>
             <label class="field-group"><span>Class session</span><select aria-label="Select a class session" data-register-session disabled><option value="">Select a class first</option></select></label>
+            <button class="button button-danger register-delete-session" type="button" aria-label="Delete selected session" title="Delete selected session" data-delete-session disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5"/></svg>
+              <span>Delete</span>
+            </button>
+            <div class="register-session-create" data-register-create-session-controls hidden>
+              <button class="button button-primary" type="button" data-create-session>Create New Session</button>
+            </div>
             <div class="register-class-info" data-register-class-info><span class="class-icon class-icon-lilac" aria-hidden="true">—</span><span><strong>Select a class</strong><small>Session details appear here</small></span></div>
           </section>
           <section class="register-metrics" aria-label="Attendance totals"><div class="metric-chip"><span class="legend-dot present-dot"></span><span>Present</span><strong data-count="Present">0</strong></div><div class="metric-chip"><span class="legend-dot absent-dot"></span><span>Absent</span><strong data-count="Absent">0</strong></div><div class="metric-chip"><span class="legend-dot leave-dot"></span><span>On leave</span><strong data-count="Leave">0</strong></div><div class="metric-chip"><span class="legend-dot unmarked-dot"></span><span>Not marked</span><strong data-count="Not Marked">0</strong></div></section>

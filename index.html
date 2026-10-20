@@ -7,6 +7,7 @@
     <title>Dashboard · Attendify Pro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <script type="module" src="assets/js/app.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -70,43 +71,38 @@
         </header>
         <div class="page-content">
           <section class="page-heading">
-            <div><p class="eyebrow">TUESDAY, OCTOBER 20, 2026</p><h1>Good morning, <span data-user-first-name>there</span> <span aria-hidden="true">✦</span></h1><p class="page-subtitle">Here’s what’s happening at your school today.</p></div>
+            <div><p class="eyebrow" data-dashboard-date>YOUR ATTENDANCE OVERVIEW</p><h1>Good morning, <span data-user-first-name>there</span> <span aria-hidden="true">✦</span></h1><p class="page-subtitle">Here’s what’s happening at your school today.</p></div>
             <a class="button button-primary" href="attendance.html"><span aria-hidden="true">＋</span> Take attendance</a>
           </section>
           <section class="stats-grid" aria-label="School overview">
             <article class="stat-card">
               <div class="stat-card-top"><span class="stat-icon stat-icon-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.25"/><path d="M3.5 20v-1.25A4.75 4.75 0 0 1 8.25 14h1.5a4.75 4.75 0 0 1 4.75 4.75V20zM16 5.25a3.25 3.25 0 0 1 0 6.5M17 14.25a4.75 4.75 0 0 1 3.5 4.58V20h-3"/></svg></span><span class="stat-trend trend-positive">+4.2%</span></div>
-              <p class="stat-label">Total students</p><p class="stat-value">1,248</p><p class="stat-note">Compared to last month</p>
+              <p class="stat-label">Total students</p><p class="stat-value" data-dashboard-total-students>—</p><p class="stat-note">Active students in your classes</p>
             </article>
             <article class="stat-card">
               <div class="stat-card-top"><span class="stat-icon stat-icon-green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span><span class="stat-trend trend-positive">+1.8%</span></div>
-              <p class="stat-label">Present today</p><p class="stat-value">1,106</p><p class="stat-note">88.6% of all students</p>
+              <p class="stat-label">Present today</p><p class="stat-value" data-dashboard-present>—</p><p class="stat-note">From today’s latest class sessions</p>
             </article>
             <article class="stat-card">
               <div class="stat-card-top"><span class="stat-icon stat-icon-red" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg></span><span class="stat-trend trend-neutral">Today</span></div>
-              <p class="stat-label">Absent today</p><p class="stat-value">86</p><p class="stat-note">6.9% of all students</p>
+              <p class="stat-label">Absent today</p><p class="stat-value" data-dashboard-absent>—</p><p class="stat-note">From today’s latest class sessions</p>
             </article>
             <article class="stat-card">
               <div class="stat-card-top"><span class="stat-icon stat-icon-amber" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><span class="stat-trend trend-neutral">Today</span></div>
-              <p class="stat-label">On leave</p><p class="stat-value">24</p><p class="stat-note">1.9% of all students</p>
+              <p class="stat-label">On leave</p><p class="stat-value" data-dashboard-leave>—</p><p class="stat-note">From today’s latest class sessions</p>
             </article>
           </section>
           <section class="dashboard-grid">
             <article class="card attendance-overview">
               <div class="card-heading"><div><h2>Today’s attendance</h2><p class="card-subtitle">School-wide student check-in</p></div><a class="text-link" href="attendance.html">View register <span aria-hidden="true">→</span></a></div>
-              <div class="attendance-summary"><div class="donut-chart" role="img" aria-label="88.6 percent present"><div><strong>88.6%</strong><span>Present</span></div></div><div class="attendance-legend"><div><span class="legend-dot present-dot"></span><span>Present</span><strong>1,106</strong></div><div><span class="legend-dot absent-dot"></span><span>Absent</span><strong>86</strong></div><div><span class="legend-dot leave-dot"></span><span>On leave</span><strong>24</strong></div><div><span class="legend-dot unmarked-dot"></span><span>Not marked</span><strong>32</strong></div></div></div>
+              <div class="attendance-summary"><div class="donut-chart" data-dashboard-chart role="img" aria-label="Attendance data is loading"><div><strong data-dashboard-rate>—</strong><span>Present</span></div></div><div class="attendance-legend"><div><span class="legend-dot present-dot"></span><span>Present</span><strong data-dashboard-present-legend>—</strong></div><div><span class="legend-dot absent-dot"></span><span>Absent</span><strong data-dashboard-absent-legend>—</strong></div><div><span class="legend-dot leave-dot"></span><span>On leave</span><strong data-dashboard-leave-legend>—</strong></div><div><span class="legend-dot unmarked-dot"></span><span>Not marked</span><strong data-dashboard-unmarked>—</strong></div></div></div>
             </article>
             <article class="card class-progress">
-              <div class="card-heading"><div><h2>Class check-in</h2><p class="card-subtitle">Attendance submitted today</p></div><a class="text-link" href="classes.html">All classes <span aria-hidden="true">→</span></a></div>
-              <div class="progress-list">
-                <div class="progress-row"><div class="progress-row-top"><span>Grade 10 · Section A</span><strong>28 / 30</strong></div><div class="progress-track"><span style="width:93%"></span></div></div>
-                <div class="progress-row"><div class="progress-row-top"><span>Grade 9 · Section B</span><strong>24 / 28</strong></div><div class="progress-track"><span style="width:86%"></span></div></div>
-                <div class="progress-row"><div class="progress-row-top"><span>Grade 8 · Section A</span><strong>22 / 26</strong></div><div class="progress-track"><span style="width:85%"></span></div></div>
-                <div class="progress-row"><div class="progress-row-top"><span>Grade 7 · Section C</span><strong>Not started</strong></div><div class="progress-track progress-track-empty"><span style="width:0%"></span></div></div>
-              </div>
+              <div class="card-heading"><div><h2>Class check-in</h2><p class="card-subtitle" data-dashboard-total-classes>Loading classes…</p></div><a class="text-link" href="classes.html">All classes <span aria-hidden="true">→</span></a></div>
+              <div class="progress-list" data-dashboard-progress><p class="subject-empty">Loading class attendance…</p></div>
             </article>
           </section>
-          <p class="page-footnote">Demo workspace · Sample attendance data for illustration</p>
+          <p class="page-footnote" data-dashboard-status>Attendance data is private to your teacher account.</p>
         </div>
       </main>
     </div>
