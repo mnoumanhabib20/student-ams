@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient.js";
-import * as XLSX from "https://esm.sh/xlsx-js-style@1.2.0";
+import * as XLSX from "https://esm.sh/xlsx@0.18.5";
 
 const classSelect = document.querySelector("[data-report-class]");
 const subjectSelect = document.querySelector("[data-report-subject]");
@@ -68,18 +68,22 @@ function getRollNumberVal(rollStr) {
 
 function isStudentActiveOnDate(student, date) {
   const createdDate = student.created_at?.slice(0, 10);
-  const deletedDate = student.deleted_at?.slice(0, 10);
+  const deletedDate = (student.deleted_at ?? (
+    student.status === "inactive" ? student.updated_at : null
+  ))?.slice(0, 10);
   if (createdDate && createdDate > date) return false;
   if (deletedDate) return deletedDate >= date;
-  return student.status === "active";
+  return student.status !== "inactive";
 }
 
 function overlapsActiveWindow(student, dateFrom, dateTo) {
   const createdDate = student.created_at?.slice(0, 10);
-  const deletedDate = student.deleted_at?.slice(0, 10);
+  const deletedDate = (student.deleted_at ?? (
+    student.status === "inactive" ? student.updated_at : null
+  ))?.slice(0, 10);
   if (createdDate && createdDate > dateTo) return false;
   if (deletedDate) return deletedDate >= dateFrom;
-  return student.status === "active";
+  return student.status !== "inactive";
 }
 
 function showRowsMessage(message) {
@@ -199,9 +203,9 @@ function renderReport(rows, sessions, dateFrom, dateTo) {
   studentCountElement.textContent = String(rows.length);
 
   if (!rows.length) {
-    const message = !sessions.length
-      ? "No class sessions match the selected class, subject, and date range."
-      : "No students were active in this class during the selected date range.";
+    const message = sessions.length
+      ? "No records found for this period"
+      : "No attendance sessions found in this date range";
     const emptyRow = document.createElement("tr");
     const emptyCell = document.createElement("td");
     emptyCell.colSpan = 7;
@@ -373,12 +377,23 @@ function renderCalendarMonth() {
     dateNumber.textContent = String(dayNumber);
     dayCell.append(dateNumber);
 
+    if (isInRange && sessionsOnDate > 0) {
+      const lectureCount = document.createElement("span");
+      lectureCount.className = "calendar-day-lecture-count";
+      lectureCount.textContent = `${sessionsOnDate} ${sessionsOnDate === 1 ? "Lacture" : "Lactures"}`;
+      dayCell.append(lectureCount);
+    }
+
     if (!isInRange || sessionsOnDate === 0 || isWeekend) {
       dayCell.classList.add("calendar-day-disabled");
       if (isWeekend) dayCell.classList.add("calendar-day-weekend");
+      const dayDescription = isWeekend ? "weekend" : "no session";
+      const lectureDescription = sessionsOnDate > 0
+        ? `, ${sessionsOnDate} ${sessionsOnDate === 1 ? "Lacture" : "Lactures"}`
+        : "";
       dayCell.setAttribute(
         "aria-label",
-        `${date.toLocaleDateString()}, ${isWeekend ? "weekend" : "no session"}`,
+        `${date.toLocaleDateString()}, ${dayDescription}${lectureDescription}`,
       );
       fragment.append(dayCell);
       continue;
@@ -414,9 +429,9 @@ function renderCalendarMonth() {
     dayCell.append(statusText);
     dayCell.setAttribute(
       "aria-label",
-      `${date.toLocaleDateString()}: ${statusLabel}; ${sessionsOnDate} ${sessionsOnDate === 1 ? "session" : "sessions"}`,
+      `${date.toLocaleDateString()}: ${statusLabel}; ${sessionsOnDate} ${sessionsOnDate === 1 ? "Lacture" : "Lactures"}`,
     );
-    dayCell.title = `${statusLabel} · ${sessionsOnDate} ${sessionsOnDate === 1 ? "session" : "sessions"}`;
+    dayCell.title = `${statusLabel} · ${sessionsOnDate} ${sessionsOnDate === 1 ? "Lacture" : "Lactures"}`;
     fragment.append(dayCell);
   }
 
@@ -471,26 +486,41 @@ async function loadStudentAttendance() {
   loadingRow.append(loadingCell);
   rowsElement.replaceChildren(loadingRow);
 
+  let fetchStep = "active students";
   try {
     const classStudents = await fetchAllRows(() =>
       supabase
         .from("students")
-        .select("id, class_id, full_name, roll_number, status, created_at, deleted_at")
+        .select("*")
         .eq("teacher_id", teacherId)
         .eq("class_id", classId)
         .order("roll_number"),
     );
-    const sessions = await fetchAllRows(() =>
+    classStudents.sort((a, b) =>
+      getRollNumberVal(a.roll_number) - getRollNumberVal(b.roll_number)
+      || String(a.roll_number).localeCompare(String(b.roll_number), undefined, { numeric: true }),
+    );
+
+    fetchStep = "class sessions";
+    const fetchedSessions = await fetchAllRows(() =>
       supabase
         .from("class_sessions")
-        .select("id, session_date")
+        .select("id, session_date, class_id, subject_id, status")
         .eq("class_id", classId)
         .eq("subject_id", subjectId)
-        .eq("created_by", teacherId)
-        .gte("session_date", dateFrom)
-        .lte("session_date", dateTo)
-        .neq("status", "cancelled"),
+        .order("session_date")
+        .order("id"),
     );
+    const sessions = fetchedSessions
+      .map((session) => ({
+        ...session,
+        session_date: String(session.session_date ?? "").slice(0, 10),
+      }))
+      .filter((session) =>
+        session.status !== "cancelled"
+        && session.session_date >= dateFrom
+        && session.session_date <= dateTo,
+      );
 
     if (!sessions.length) {
       if (requestId !== requestVersion) return;
@@ -498,6 +528,7 @@ async function loadStudentAttendance() {
       return;
     }
 
+    fetchStep = "attendance records";
     const attendance = [];
     for (let offset = 0; offset < sessions.length; offset += 100) {
       const sessionIds = sessions.slice(offset, offset + 100).map((session) => session.id);
@@ -511,6 +542,7 @@ async function loadStudentAttendance() {
 
     if (requestId !== requestVersion) return;
 
+    fetchStep = "historical student details";
     const studentById = new Map(classStudents.map((student) => [student.id, student]));
     const historicalStudentIds = [...new Set(attendance.map((record) => record.student_id))]
       .filter((studentId) => !studentById.has(studentId));
@@ -519,7 +551,7 @@ async function loadStudentAttendance() {
       const historicalStudents = await fetchAllRows(() =>
         supabase
           .from("students")
-          .select("id, class_id, full_name, roll_number, status, created_at, deleted_at")
+          .select("*")
           .eq("teacher_id", teacherId)
           .in("id", studentIds),
       );
@@ -563,12 +595,23 @@ async function loadStudentAttendance() {
       .map((student) => ({
         ...student,
         percentage: (student.present / student.sessionsHeld) * 100,
-      }));
+      }))
+      .sort((a, b) =>
+        getRollNumberVal(a.roll_number) - getRollNumberVal(b.roll_number)
+        || String(a.roll_number).localeCompare(String(b.roll_number), undefined, { numeric: true }),
+      );
     renderReport(rows, sessions, dateFrom, dateTo);
   } catch (error) {
     if (requestId !== requestVersion) return;
-    console.error("Could not load student attendance:", error);
-    clearReport("Attendance data is unavailable. Check your connection or access, then try again.");
+    console.error("Supabase Report Fetch Error:", error);
+    console.error("Report fetch context:", {
+      step: fetchStep,
+      classId,
+      subjectId,
+      dateFrom,
+      dateTo,
+    });
+    clearReport("No records found for this period");
   } finally {
     if (requestId === requestVersion) rowsElement.setAttribute("aria-busy", "false");
   }
@@ -606,6 +649,15 @@ function getFilenamePart(value) {
 
 function exportReport() {
   try {
+    if (
+      !XLSX?.utils?.aoa_to_sheet
+      || !XLSX.utils.book_new
+      || !XLSX.utils.book_append_sheet
+      || !XLSX.write
+    ) {
+      throw new Error("The Excel export library did not load correctly. Refresh the page and try again.");
+    }
+
     if (!reportRows.length) {
       throw new Error("There is no attendance data to export for the selected filters.");
     }
@@ -693,7 +745,19 @@ function exportReport() {
     XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
     const filename =
       `attendance-report-${getFilenamePart(selectedClass)}-${generatedDate}-${timestamp}.xlsx`;
-    XLSX.writeFile(wb, filename);
+    const workbookData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const workbookBlob = new Blob([workbookData], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const downloadUrl = URL.createObjectURL(workbookBlob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = filename;
+    downloadLink.hidden = true;
+    document.body.append(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
     showExportToast("Excel report downloaded successfully");
   } catch (error) {
     console.error("Could not export attendance report:", error);

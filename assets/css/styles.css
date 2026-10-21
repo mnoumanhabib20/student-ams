@@ -421,6 +421,7 @@ tbody tr:hover { background: #fbfcfe; }
 .calendar-weekday { padding: 4px 0; color: var(--color-text-muted); font-size: 9px; font-weight: 700; text-align: center; }
 .calendar-day { display: grid; min-height: 66px; align-content: space-between; gap: 7px; padding: 8px; border: 1px solid #e6ebf0; border-radius: 8px; }
 .calendar-day-number { font-size: 11px; font-weight: 650; }
+.calendar-day-lecture-count { font-size: 8px; font-weight: 650; white-space: nowrap; }
 .calendar-day-status { overflow: hidden; font-size: 9px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .calendar-day-present { border-color: #a7f3d0; background: #d1fae5; color: #065f46; font-weight: 700; }
 .calendar-day-absent { border-color: #fecdd3; background: #ffe4e6; color: #9f1239; font-weight: 700; }
@@ -624,6 +625,7 @@ tbody tr:hover { background: #fbfcfe; }
   .attendance-calendar-grid { gap: 3px; }
   .calendar-day { min-height: 56px; gap: 4px; padding: 5px; border-radius: 6px; }
   .calendar-day-number { font-size: 10px; }
+  .calendar-day-lecture-count { font-size: 7px; }
   .calendar-day-status { font-size: 8px; }
   .calendar-legend { gap: 8px 12px; }
 }
