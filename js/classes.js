@@ -192,6 +192,13 @@ function buildClassCard(classRow, index) {
     }
   });
 
+  const deleteButton = makeElement("button", "button button-danger", "Delete");
+  deleteButton.type = "button";
+  deleteButton.setAttribute("aria-label", `Delete ${classRow.name} ${classRow.section}`);
+  deleteButton.addEventListener("click", () => {
+    void deleteClass(classRow, deleteButton);
+  });
+
   const archiveButton = makeElement(
     "button",
     "button button-quiet",
@@ -203,7 +210,7 @@ function buildClassCard(classRow, index) {
       .catch((error) => showOperationError("update class status", error));
   });
 
-  actions.append(subjectsButton, editButton, archiveButton);
+  actions.append(subjectsButton, editButton, deleteButton, archiveButton);
   card.append(header, grade, title, year, description, subjectPreview, footer, actions);
   return card;
 }
@@ -437,6 +444,43 @@ async function updateClassStatus(classRow, status) {
   await loadClasses();
 }
 
+async function deleteClass(classRow, button) {
+  if (button.disabled) return;
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this class? This will permanently delete all associated subjects, students, and attendance records.",
+  );
+  if (!confirmed) return;
+
+  button.disabled = true;
+  try {
+    const user = await getTeacher();
+    if (!user) {
+      window.location.replace("login.html");
+      return;
+    }
+    if (user.id !== teacherId) {
+      throw new Error("The signed-in account changed. Reload the page and try again.");
+    }
+
+    const { data, error } = await supabase
+      .from("classes")
+      .delete()
+      .eq("id", classRow.id)
+      .eq("teacher_id", user.id)
+      .select("id")
+      .single();
+    if (error) throw error;
+    if (!data) throw new Error("The class was not found or could not be deleted.");
+
+    showToast("Class and associated records deleted.");
+    await loadClasses();
+  } catch (error) {
+    showOperationError("delete class", error);
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderSubjects(subjects) {
   elements.subjectList.replaceChildren();
   if (!subjects.length) {
@@ -465,9 +509,37 @@ function renderSubjects(subjects) {
         showOperationError("open subject editor", error);
       }
     });
-    item.append(identity, edit);
+
+    const actions = makeElement("div", "subject-list-actions");
+    const deleteButton = makeElement("button", "button button-danger subject-edit-button", "Delete");
+    deleteButton.type = "button";
+    deleteButton.setAttribute("aria-label", `Delete ${subject.name}`);
+    deleteButton.addEventListener("click", () => {
+      void deleteSubject(subject, deleteButton);
+    });
+    actions.append(edit, deleteButton);
+    item.append(identity, actions);
     elements.subjectList.append(item);
   });
+}
+
+async function fetchSubjectsForClass(classRow) {
+  const user = await getTeacher();
+  if (!user) {
+    window.location.replace("login.html");
+    return null;
+  }
+  if (user.id !== teacherId) {
+    throw new Error("The signed-in account changed. Reload the page and try again.");
+  }
+
+  const { data, error } = await supabase
+    .from("subjects")
+    .select("id, class_id, name, code, created_at")
+    .eq("class_id", classRow.id)
+    .order("name", { ascending: true });
+  if (error) throw error;
+  return data ?? [];
 }
 
 async function loadSubjectsForClass(classRow) {
@@ -482,21 +554,58 @@ async function loadSubjectsForClass(classRow) {
   elements.subjectList.replaceChildren(makeElement("p", "subject-empty", "Loading subjects…"));
   elements.subjectDialog.showModal();
 
-  const user = await getTeacher();
-  if (!user) {
-    closeDialog(elements.subjectDialog);
-    window.location.replace("login.html");
-    return;
+  const subjects = await fetchSubjectsForClass(classRow);
+  if (subjects) {
+    classRow.subjects = subjects;
+    renderSubjects(subjects);
   }
-  if (user.id !== teacherId) throw new Error("The signed-in account changed. Reload the page and try again.");
+}
 
-  const { data, error } = await supabase
-    .from("subjects")
-    .select("id, class_id, name, code, created_at")
-    .eq("class_id", classRow.id)
-    .order("name", { ascending: true });
-  if (error) throw error;
-  renderSubjects(data ?? []);
+async function deleteSubject(subject, button) {
+  if (!selectedSubjectClass || button.disabled) return;
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this subject? Associated attendance sessions will also be removed.",
+  );
+  if (!confirmed) return;
+
+  button.disabled = true;
+  try {
+    const user = await getTeacher();
+    if (!user) {
+      window.location.replace("login.html");
+      return;
+    }
+    if (user.id !== teacherId) {
+      throw new Error("The signed-in account changed. Reload the page and try again.");
+    }
+
+    const { data, error } = await supabase
+      .from("subjects")
+      .delete()
+      .eq("id", subject.id)
+      .eq("class_id", selectedSubjectClass.id)
+      .select("id")
+      .single();
+    if (error) throw error;
+    if (!data) throw new Error("The subject was not found or could not be deleted.");
+
+    if (Array.isArray(selectedSubjectClass.subjects)) {
+      selectedSubjectClass.subjects = selectedSubjectClass.subjects.filter(
+        (item) => item.id !== subject.id,
+      );
+    }
+    renderSubjects(
+      Array.isArray(selectedSubjectClass.subjects)
+        ? selectedSubjectClass.subjects
+        : [],
+    );
+    showToast("Subject and associated sessions deleted.");
+    await loadClasses();
+  } catch (error) {
+    showOperationError("delete subject", error);
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function saveSubject(event) {

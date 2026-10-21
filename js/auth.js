@@ -95,23 +95,36 @@ function setFormBusy(form, isBusy, busyLabel) {
 }
 
 function getProfileName(user) {
-  return user.user_metadata?.full_name?.trim() || user.email || "Teacher";
+  return (
+    user.user_metadata?.full_name?.trim() ||
+    user.user_metadata?.name?.trim() ||
+    user.email ||
+    "Teacher"
+  );
 }
 
 async function updateTeacherIdentity(user) {
   if (!user) return;
 
   let fullName = getProfileName(user);
+  let institutionName =
+    user.user_metadata?.institution_name?.trim() ||
+    user.user_metadata?.institution?.trim() ||
+    "";
   const { data, error } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, institution_name")
     .eq("id", user.id)
     .maybeSingle();
 
   if (error) {
     console.error("Could not load teacher profile:", error);
-  } else if (data?.full_name?.trim()) {
-    fullName = data.full_name.trim();
+  } else if (data) {
+    const profileName = data.full_name?.trim();
+    if (profileName && profileName.toLocaleLowerCase() !== "new teacher") {
+      fullName = profileName;
+    }
+    institutionName = data.institution_name?.trim() || institutionName;
   }
 
   const firstName = fullName.split(/\s+/)[0] || "Teacher";
@@ -133,6 +146,18 @@ async function updateTeacherIdentity(user) {
   });
   document.querySelectorAll("[data-user-first-name]").forEach((element) => {
     element.textContent = firstName;
+  });
+  document.querySelectorAll(".workspace-copy strong").forEach((element) => {
+    element.textContent = fullName;
+  });
+  document.querySelectorAll("#workspace-teacher-name").forEach((element) => {
+    element.textContent = fullName;
+  });
+  document.querySelectorAll("#workspace-institution-name").forEach((element) => {
+    element.textContent = institutionName || "School workspace";
+  });
+  document.querySelectorAll("#workspace-avatar").forEach((element) => {
+    element.textContent = initials || "T";
   });
   document.querySelectorAll("[data-sign-out]").forEach((element) => {
     element.setAttribute("aria-label", `Sign out ${fullName}`);

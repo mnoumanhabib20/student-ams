@@ -21,6 +21,7 @@ const avatarClasses = ["avatar-lilac", "avatar-blue", "avatar-peach", "avatar-gr
 let teacherId = null;
 let students = [];
 let attendanceByStudent = new Map();
+let loadedSessions = [];
 let toastTimer = 0;
 let requestVersion = 0;
 let attendanceSaveInProgress = false;
@@ -28,6 +29,31 @@ let attendanceSaveInProgress = false;
 function localDateValue(date = new Date()) {
   const offset = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function isStudentActiveOnDate(student, sessionDate) {
+  const createdDate = student.created_at?.slice(0, 10);
+  const deletedDate = student.deleted_at?.slice(0, 10);
+  if (createdDate && createdDate > sessionDate) return false;
+  if (deletedDate) return deletedDate >= sessionDate;
+  return student.status === "active";
+}
+
+function getRollNumberVal(rollStr) {
+  if (!rollStr) return 0;
+  let str = rollStr.toString().trim();
+  if (str.length > 2) {
+    str = str.slice(-2);
+  }
+  const num = parseInt(str.replace(/\D/g, ""), 10);
+  return Number.isNaN(num) ? 0 : num;
+}
+
+function sortStudentsByRollNumber(studentList) {
+  return studentList.sort((a, b) =>
+    getRollNumberVal(a.roll_number) - getRollNumberVal(b.roll_number)
+    || String(a.roll_number).localeCompare(String(b.roll_number), undefined, { numeric: true }),
+  );
 }
 
 function showToast(message, kind = "success") {
@@ -204,6 +230,7 @@ async function loadSessions(preferredSessionId = null) {
   sessionSelect.disabled = true;
   deleteSessionButton.disabled = true;
   sessionSelect.replaceChildren(new Option("Choose a class and subject first", ""));
+  loadedSessions = [];
   createSessionControls.hidden = !classId || !subjectId || !selectedDate;
   createSessionButton.disabled = !classId || !subjectId || !selectedDate;
   students = [];
@@ -226,23 +253,40 @@ async function loadSessions(preferredSessionId = null) {
     return;
   }
 
-  const { data, error } = await supabase
-    .from("class_sessions")
-    .select("id, class_id, subject_id, session_date, title, status, created_by, created_at")
-    .eq("class_id", classId)
-    .eq("subject_id", subjectId)
-    .eq("session_date", selectedDate)
-    .eq("created_by", teacherId)
-    .order("created_at");
-
-  if (version !== requestVersion) return;
-  if (error) throw error;
+  let data;
+  try {
+    const result = await supabase
+      .from("class_sessions")
+      .select("id, class_id, subject_id, session_date, title, status, created_by, created_at")
+      .eq("class_id", classId)
+      .eq("subject_id", subjectId)
+      .eq("session_date", selectedDate)
+      .eq("created_by", teacherId)
+      .neq("status", "cancelled")
+      .order("created_at");
+    if (version !== requestVersion) return;
+    if (result.error) throw result.error;
+    data = result.data ?? [];
+    loadedSessions = data;
+  } catch (error) {
+    if (version !== requestVersion) return;
+    console.error("Could not load class sessions:", error);
+    sessionSelect.replaceChildren(new Option("Sessions unavailable", ""));
+    sessionSelect.disabled = true;
+    showRowsMessage("Sessions couldn’t be loaded. Check your connection and session access, then try again.");
+    studentCount.textContent = "· Sessions unavailable";
+    createSessionControls.hidden = false;
+    createSessionButton.disabled = false;
+    updateClassInfo();
+    showToast("Couldn’t load sessions. Please try again.", "error");
+    return;
+  }
 
   createSessionControls.hidden = false;
   createSessionButton.disabled = false;
   createSessionButton.textContent = "Create Session";
 
-  if (!data?.length) {
+  if (!data.length) {
     sessionSelect.replaceChildren(new Option("No sessions for this date", ""));
     sessionSelect.disabled = true;
     deleteSessionButton.disabled = true;
@@ -371,33 +415,88 @@ async function loadRegister() {
     return;
   }
 
-  showRowsMessage("Loading roster and saved attendance…");
+  showRowsMessage("Loading sessions, active students, and saved attendance…");
 
-  const [{ data: studentData, error: studentError }, { data: attendanceData, error: attendanceError }] =
-    await Promise.all([
-      supabase
+  try {
+    const session = loadedSessions.find((item) =>
+      item.id === sessionId
+      && item.class_id === classId
+      && item.subject_id === subjectSelect.value
+      && item.session_date === dateInput.value
+      && item.created_by === teacherId
+      && item.status !== "cancelled",
+    );
+    if (!session) {
+      students = [];
+      attendanceByStudent.clear();
+      sessionSelect.replaceChildren(new Option("No sessions for this date", ""));
+      sessionSelect.disabled = true;
+      deleteSessionButton.disabled = true;
+      createSessionControls.hidden = false;
+      createSessionButton.disabled = false;
+      showRowsMessage("No active session exists for this selection. Create a session to take attendance.");
+      studentCount.textContent = "· No active session";
+      updateClassInfo();
+      return;
+    }
+
+    const { data: fetchedStudents, error: studentError } = await supabase
+      .from("students")
+      .select("*")
+      .eq("teacher_id", teacherId)
+      .eq("class_id", classId)
+      .eq("status", "active")
+      .order("roll_number");
+    console.log("Fetched students for register:", fetchedStudents, studentError);
+    if (version !== requestVersion) return;
+    if (studentError) throw studentError;
+
+    const activeStudents = fetchedStudents ?? [];
+    // attendance_records has no teacher_id; the selected session is owner-checked above and RLS scopes this query.
+    const { data: attendanceData, error: attendanceError } = await supabase
+      .from("attendance_records")
+      .select("student_id, attendance_status")
+      .eq("session_id", session.id);
+    if (version !== requestVersion) return;
+    if (attendanceError) throw attendanceError;
+
+    attendanceByStudent = new Map(
+      (attendanceData ?? []).map((record) => [record.student_id, record.attendance_status]),
+    );
+    const studentsById = new Map(activeStudents.map((student) => [student.id, student]));
+    const historicalStudentIds = [...attendanceByStudent.keys()]
+      .filter((studentId) => !studentsById.has(studentId));
+    for (let offset = 0; offset < historicalStudentIds.length; offset += 100) {
+      const studentIds = historicalStudentIds.slice(offset, offset + 100);
+      const { data, error } = await supabase
         .from("students")
-        .select("id, class_id, roll_number, full_name")
+        .select("id, class_id, roll_number, full_name, status, created_at, deleted_at")
         .eq("teacher_id", teacherId)
-        .eq("class_id", classId)
-        .eq("status", "active")
-        .order("roll_number"),
-      supabase
-        .from("attendance_records")
-        .select("student_id, attendance_status")
-        .eq("session_id", sessionId),
-    ]);
+        .in("id", studentIds);
+      if (version !== requestVersion) return;
+      if (error) throw error;
+      (data ?? []).forEach((student) => studentsById.set(student.id, student));
+    }
 
-  if (version !== requestVersion) return;
-  if (studentError) throw studentError;
-  if (attendanceError) throw attendanceError;
-
-  students = studentData ?? [];
-  attendanceByStudent = new Map(
-    (attendanceData ?? []).map((record) => [record.student_id, record.attendance_status]),
-  );
-  renderRegister();
-  saveStatus.textContent = "Showing saved attendance.";
+    students = sortStudentsByRollNumber(
+      [...studentsById.values()].filter((student) =>
+        (student.class_id === classId || attendanceByStudent.has(student.id))
+        && isStudentActiveOnDate(student, session.session_date),
+      ),
+    );
+    renderRegister();
+    saveStatus.textContent = "Showing saved attendance.";
+  } catch (error) {
+    if (version !== requestVersion) return;
+    console.error("Could not load the attendance register data:", error);
+    students = [];
+    attendanceByStudent.clear();
+    showRowsMessage("Couldn’t load this register. Check your connection and teacher access, then try again.");
+    studentCount.textContent = "· Roster unavailable";
+    saveButton.disabled = true;
+    markAllButton.disabled = true;
+    showToast("Couldn’t load attendance data. Please try again.", "error");
+  }
 }
 
 async function saveAttendance() {
@@ -423,6 +522,7 @@ async function saveAttendance() {
     select.disabled = true;
   });
   saveStatus.textContent = "Saving attendance…";
+  let savedRecordCount = 0;
 
   try {
     const records = students.map((student) => {
@@ -441,14 +541,44 @@ async function saveAttendance() {
       };
     });
 
-    const { error } = await supabase
-      .from("attendance_records")
-      .upsert(records, {
-        onConflict: "session_id,student_id",
-        ignoreDuplicates: false,
-      });
+    const studentsById = new Map(students.map((student) => [student.id, student]));
+    const currentClassRecords = records.filter((record) =>
+      studentsById.get(record.student_id)?.class_id === classSelect.value,
+    );
+    const historicalRecords = records.filter((record) =>
+      studentsById.get(record.student_id)?.class_id !== classSelect.value,
+    );
 
-    if (error) throw error;
+    if (currentClassRecords.length) {
+      const { error } = await supabase
+        .from("attendance_records")
+        .upsert(currentClassRecords, {
+          onConflict: "session_id,student_id",
+          ignoreDuplicates: false,
+        });
+      if (error) throw error;
+      savedRecordCount += currentClassRecords.length;
+    }
+
+    const historicalByStatus = new Map();
+    historicalRecords.forEach((record) => {
+      if (!historicalByStatus.has(record.attendance_status)) {
+        historicalByStatus.set(record.attendance_status, []);
+      }
+      historicalByStatus.get(record.attendance_status).push(record.student_id);
+    });
+    for (const [attendanceStatus, studentIds] of historicalByStatus) {
+      for (let offset = 0; offset < studentIds.length; offset += 100) {
+        const { data, error } = await supabase
+          .from("attendance_records")
+          .update({ attendance_status: attendanceStatus })
+          .eq("session_id", sessionId)
+          .in("student_id", studentIds.slice(offset, offset + 100))
+          .select("student_id");
+        if (error) throw error;
+        savedRecordCount += data?.length ?? 0;
+      }
+    }
 
     records.forEach((record) => {
       attendanceByStudent.set(record.student_id, record.attendance_status);
@@ -465,11 +595,13 @@ async function saveAttendance() {
     saveStatus.textContent = "Attendance could not be saved.";
     const errorMessage = error instanceof Error ? error.message.toLowerCase() : "";
     showToast(
-      errorMessage.includes("row-level security")
-        ? "Supabase denied this save. Check the attendance_records RLS policy for this session and class."
-        : errorMessage.includes("invalid attendance status")
-          ? "Attendance wasn’t saved because a status value was invalid. Reload the register and try again."
-          : "Attendance wasn’t saved. Check your connection and try again.",
+      savedRecordCount > 0
+        ? `Attendance was partially saved (${savedRecordCount} records). Reload the register before continuing.`
+        : errorMessage.includes("row-level security")
+          ? "Supabase denied this save. Check the attendance_records RLS policy for this session and class."
+          : errorMessage.includes("invalid attendance status")
+            ? "Attendance wasn’t saved because a status value was invalid. Reload the register and try again."
+            : "Attendance wasn’t saved. Check your connection and try again.",
       "error",
     );
   } finally {

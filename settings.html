@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#142b4a">
+    <title>Settings · Attendify Pro</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" src="assets/js/app.js"></script>
+    <script type="module" src="js/settings.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <button class="sidebar-backdrop" type="button" aria-label="Close navigation" data-sidebar-close></button>
+      <aside class="sidebar" id="primary-navigation" aria-label="Primary navigation">
+        <a class="brand" href="dashboard.html" aria-label="Attendify Pro home"><span class="brand-mark" aria-hidden="true">A</span><span class="brand-copy"><strong>Attendify</strong><span>PRO</span></span></a>
+        <div class="workspace-switcher"><span class="workspace-avatar" id="workspace-avatar" aria-hidden="true">T</span><span class="workspace-copy"><strong id="workspace-teacher-name">Teacher</strong><span id="workspace-institution-name">School workspace</span></span><span class="workspace-chevron" aria-hidden="true">⌄</span></div>
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="primary-nav">
+          <a class="nav-link" href="dashboard.html" data-page="dashboard.html"><svg data-lucide="layout-grid" class="w-5 h-5 shrink-0"></svg><span>Dashboard</span></a>
+          <a class="nav-link" href="classes.html" data-page="classes.html"><svg data-lucide="book-open" class="w-5 h-5 shrink-0"></svg><span>Classes</span></a>
+          <a class="nav-link" href="students.html" data-page="students.html"><svg data-lucide="users" class="w-5 h-5 shrink-0"></svg><span>Students</span></a>
+          <a class="nav-link" href="attendance.html" data-page="attendance.html"><svg data-lucide="calendar-check" class="w-5 h-5 shrink-0"></svg><span>Attendance</span></a>
+          <a class="nav-link" href="reports.html" data-page="reports.html"><svg data-lucide="bar-chart-2" class="w-5 h-5 shrink-0"></svg><span>Reports</span></a>
+          <a class="nav-link" href="settings.html" data-page="settings.html"><svg data-lucide="settings" class="w-5 h-5 shrink-0"></svg><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-bottom"><a class="help-card" href="mailto:support@attendifypro.example"><span class="help-icon" aria-hidden="true">?</span><span><strong>Need a hand?</strong><small>Visit our help center</small></span><span class="help-arrow" aria-hidden="true">↗</span></a><button class="profile-button" type="button" data-sign-out title="Sign out"><span class="profile-avatar" aria-hidden="true" data-user-initials>…</span><span class="profile-copy"><strong data-user-name>Loading profile…</strong><small data-user-email></small></span><span class="profile-more" aria-hidden="true">↪</span></button></div>
+      </aside>
+      <main class="main-panel">
+        <header class="topbar"><button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false" data-sidebar-toggle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong>Settings</strong></div><div class="topbar-actions"><span class="today-label" data-current-date></span></div></header>
+        <div class="page-content">
+          <section class="page-heading"><div><p class="eyebrow">ACCOUNT PREFERENCES</p><h1>Teacher settings</h1><p class="page-subtitle">Manage your profile and school workspace details.</p></div></section>
+          <section class="settings-grid">
+            <form class="card settings-card" data-settings-form>
+              <div class="card-heading"><div><h2>Profile & institution</h2><p class="card-subtitle">Your name and institution appear in the workspace.</p></div></div>
+              <label class="auth-field"><span>Display name</span><input name="full_name" type="text" maxlength="120" autocomplete="name" required data-settings-name></label>
+              <label class="auth-field"><span>Institution name</span><input name="institution_name" type="text" maxlength="160" placeholder="e.g. Northstar Academy" data-settings-institution></label>
+              <label class="auth-field"><span>Minimum Required Attendance Target (%)</span><input name="attendance_target" type="number" min="0" max="100" step="1" value="75" required data-settings-attendance-target><small class="field-help">Students below this percentage will be highlighted in red on the attendance summary.</small></label>
+              <p class="class-form-error" data-settings-error role="alert" hidden></p>
+              <button class="button button-primary" type="submit" data-settings-submit>Save changes</button>
+            </form>
+            <section class="card settings-card" aria-labelledby="account-details-title">
+              <div class="card-heading"><div><h2 id="account-details-title">Account details</h2><p class="card-subtitle">Linked to your Supabase Auth account.</p></div></div>
+              <dl class="account-details">
+                <div><dt>Email</dt><dd data-settings-email>Loading…</dd></div>
+                <div><dt>Account ID</dt><dd data-settings-id>Loading…</dd></div>
+                <div><dt>Created</dt><dd data-settings-created>Loading…</dd></div>
+              </dl>
+            </section>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div class="class-toast" data-settings-toast role="status" aria-live="polite" hidden></div>
+  </body>
+</html>

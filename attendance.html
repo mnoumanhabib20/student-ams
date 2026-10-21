@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#142b4a">
     <title>Attendance · Attendify Pro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script type="module" src="assets/js/app.js"></script>
     <script type="module" src="js/attendance.js"></script>
   </head>
@@ -14,13 +15,15 @@
       <button class="sidebar-backdrop" type="button" aria-label="Close navigation" data-sidebar-close></button>
       <aside class="sidebar" id="primary-navigation" aria-label="Primary navigation">
         <a class="brand" href="dashboard.html" aria-label="Attendify Pro home"><span class="brand-mark" aria-hidden="true">A</span><span class="brand-copy"><strong>Attendify</strong><span>PRO</span></span></a>
-        <div class="workspace-switcher"><span class="workspace-avatar" aria-hidden="true">NH</span><span class="workspace-copy"><strong>Northstar Academy</strong><span>School workspace</span></span><span class="workspace-chevron" aria-hidden="true">⌄</span></div>
+        <div class="workspace-switcher"><span class="workspace-avatar" id="workspace-avatar" aria-hidden="true">T</span><span class="workspace-copy"><strong id="workspace-teacher-name">Teacher</strong><span id="workspace-institution-name">School workspace</span></span><span class="workspace-chevron" aria-hidden="true">⌄</span></div>
         <p class="nav-label">WORKSPACE</p>
         <nav class="primary-nav">
-          <a class="nav-link" href="dashboard.html" data-page="dashboard.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
-          <a class="nav-link" href="classes.html" data-page="classes.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg><span>Classes</span></a>
-          <a class="nav-link" href="students.html" data-page="students.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.25"/><path d="M3.5 20v-1.25A4.75 4.75 0 0 1 8.25 14h1.5a4.75 4.75 0 0 1 4.75 4.75V20zM16 5.25a3.25 3.25 0 0 1 0 6.5M17 14.25a4.75 4.75 0 0 1 3.5 4.58V20h-3"/></svg><span>Students</span></a>
-          <a class="nav-link" href="attendance.html" data-page="attendance.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M3.5 10h17M8 14l2.25 2.25L16 11"/></svg><span>Attendance</span></a>
+          <a class="nav-link" href="dashboard.html" data-page="dashboard.html"><svg data-lucide="layout-grid" class="w-5 h-5 shrink-0"></svg><span>Dashboard</span></a>
+          <a class="nav-link" href="classes.html" data-page="classes.html"><svg data-lucide="book-open" class="w-5 h-5 shrink-0"></svg><span>Classes</span></a>
+          <a class="nav-link" href="students.html" data-page="students.html"><svg data-lucide="users" class="w-5 h-5 shrink-0"></svg><span>Students</span></a>
+          <a class="nav-link" href="attendance.html" data-page="attendance.html"><svg data-lucide="calendar-check" class="w-5 h-5 shrink-0"></svg><span>Attendance</span></a>
+          <a class="nav-link" href="reports.html" data-page="reports.html"><svg data-lucide="bar-chart-2" class="w-5 h-5 shrink-0"></svg><span>Reports</span></a>
+          <a class="nav-link" href="settings.html" data-page="settings.html"><svg data-lucide="settings" class="w-5 h-5 shrink-0"></svg><span>Settings</span></a>
         </nav>
         <div class="sidebar-bottom"><a class="help-card" href="mailto:support@attendifypro.example"><span class="help-icon" aria-hidden="true">?</span><span><strong>Need a hand?</strong><small>Visit our help center</small></span><span class="help-arrow" aria-hidden="true">↗</span></a><button class="profile-button" type="button" data-sign-out title="Sign out"><span class="profile-avatar" aria-hidden="true" data-user-initials>…</span><span class="profile-copy"><strong data-user-name>Loading profile…</strong><small data-user-email></small></span><span class="profile-more" aria-hidden="true">↪</span></button></div>
       </aside>

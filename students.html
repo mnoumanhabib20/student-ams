@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#142b4a">
     <title>Students · Attendify Pro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script type="module" src="assets/js/app.js"></script>
     <script type="module" src="js/students.js"></script>
   </head>
@@ -14,21 +15,23 @@
       <button class="sidebar-backdrop" type="button" aria-label="Close navigation" data-sidebar-close></button>
       <aside class="sidebar" id="primary-navigation" aria-label="Primary navigation">
         <a class="brand" href="dashboard.html" aria-label="Attendify Pro home"><span class="brand-mark" aria-hidden="true">A</span><span class="brand-copy"><strong>Attendify</strong><span>PRO</span></span></a>
-        <div class="workspace-switcher"><span class="workspace-avatar" aria-hidden="true">NH</span><span class="workspace-copy"><strong>Northstar Academy</strong><span>School workspace</span></span><span class="workspace-chevron" aria-hidden="true">⌄</span></div>
+        <div class="workspace-switcher"><span class="workspace-avatar" id="workspace-avatar" aria-hidden="true">T</span><span class="workspace-copy"><strong id="workspace-teacher-name">Teacher</strong><span id="workspace-institution-name">School workspace</span></span><span class="workspace-chevron" aria-hidden="true">⌄</span></div>
         <p class="nav-label">WORKSPACE</p>
         <nav class="primary-nav">
-          <a class="nav-link" href="dashboard.html" data-page="dashboard.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Dashboard</span></a>
-          <a class="nav-link" href="classes.html" data-page="classes.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg><span>Classes</span></a>
-          <a class="nav-link" href="students.html" data-page="students.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.25"/><path d="M3.5 20v-1.25A4.75 4.75 0 0 1 8.25 14h1.5a4.75 4.75 0 0 1 4.75 4.75V20zM16 5.25a3.25 3.25 0 0 1 0 6.5M17 14.25a4.75 4.75 0 0 1 3.5 4.58V20h-3"/></svg><span>Students</span></a>
-          <a class="nav-link" href="attendance.html" data-page="attendance.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M3.5 10h17M8 14l2.25 2.25L16 11"/></svg><span>Attendance</span></a>
+          <a class="nav-link" href="dashboard.html" data-page="dashboard.html"><svg data-lucide="layout-grid" class="w-5 h-5 shrink-0"></svg><span>Dashboard</span></a>
+          <a class="nav-link" href="classes.html" data-page="classes.html"><svg data-lucide="book-open" class="w-5 h-5 shrink-0"></svg><span>Classes</span></a>
+          <a class="nav-link" href="students.html" data-page="students.html"><svg data-lucide="users" class="w-5 h-5 shrink-0"></svg><span>Students</span></a>
+          <a class="nav-link" href="attendance.html" data-page="attendance.html"><svg data-lucide="calendar-check" class="w-5 h-5 shrink-0"></svg><span>Attendance</span></a>
+          <a class="nav-link" href="reports.html" data-page="reports.html"><svg data-lucide="bar-chart-2" class="w-5 h-5 shrink-0"></svg><span>Reports</span></a>
+          <a class="nav-link" href="settings.html" data-page="settings.html"><svg data-lucide="settings" class="w-5 h-5 shrink-0"></svg><span>Settings</span></a>
         </nav>
         <div class="sidebar-bottom"><a class="help-card" href="mailto:support@attendifypro.example"><span class="help-icon" aria-hidden="true">?</span><span><strong>Need a hand?</strong><small>Visit our help center</small></span><span class="help-arrow" aria-hidden="true">↗</span></a><button class="profile-button" type="button" data-sign-out title="Sign out"><span class="profile-avatar" aria-hidden="true" data-user-initials>…</span><span class="profile-copy"><strong data-user-name>Loading profile…</strong><small data-user-email></small></span><span class="profile-more" aria-hidden="true">↪</span></button></div>
       </aside>
       <main class="main-panel">
         <header class="topbar"><button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false" data-sidebar-toggle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong>Students</strong></div><div class="topbar-actions"><span class="today-label" data-current-date></span><button class="icon-button notification-button" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="notification-dot" aria-hidden="true"></span></button></div></header>
         <div class="page-content">
-          <section class="page-heading"><div><p class="eyebrow">SCHOOL DIRECTORY</p><h1>Students</h1><p class="page-subtitle">Manage your student roster and stay up to date.</p></div><button class="button button-primary" type="button" data-open-student-form><span aria-hidden="true">＋</span> Add student</button></section>
-          <section class="card table-card">
+          <section class="page-heading"><div><p class="eyebrow">SCHOOL DIRECTORY</p><h1>Students</h1><p class="page-subtitle">Manage your student roster and stay up to date.</p></div><div class="page-heading-actions"><button class="button button-secondary" type="button" data-export-students>Export Excel</button><button class="button button-secondary" type="button" data-download-student-template>Download Excel template</button><button class="button button-secondary" type="button" data-open-import-dialog>Import Excel</button><button class="button button-primary" type="button" data-open-student-form><span aria-hidden="true">＋</span> Add student</button></div></section>
+          <section class="card table-card student-roster-card">
             <div class="toolbar table-toolbar"><div class="toolbar-copy"><strong>All students</strong><span class="muted" data-student-count>· Loading roster</span></div><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" placeholder="Search students" aria-label="Search students" data-student-search></label><label class="student-filter-label"><span class="sr-only">Filter by class</span><select class="student-filter" aria-label="Filter students by class" data-student-class-filter><option value="">All classes</option></select></label></div>
             <div class="table-scroll"><table><thead><tr><th scope="col">STUDENT</th><th scope="col">ROLL NUMBER</th><th scope="col">CLASS</th><th scope="col">STATUS</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody data-student-rows><tr><td colspan="5" class="register-empty-cell"><span class="loading-spinner" aria-hidden="true"></span> Loading student roster…</td></tr></tbody></table></div>
             <div class="table-footer"><span data-student-footer>Loading students…</span></div>
@@ -43,9 +46,21 @@
         <p class="dialog-description">Add a student to one of your active classes.</p>
         <label class="auth-field"><span>Full name</span><input name="full_name" type="text" maxlength="120" required></label>
         <label class="auth-field"><span>Roll number</span><input name="roll_number" type="text" maxlength="40" required></label>
+        <label class="auth-field"><span>Email <small>(optional)</small></span><input name="email" type="email" maxlength="254" autocomplete="email"></label>
+        <label class="auth-field"><span>Description <small>(optional)</small></span><textarea name="description" rows="3" maxlength="1000"></textarea></label>
         <label class="auth-field"><span>Class</span><select name="class_id" required></select></label>
         <p class="class-form-error" data-student-form-error role="alert" hidden></p>
         <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-student-dialog>Cancel</button><button class="button button-primary" type="submit" data-student-submit>Save student</button></div>
+      </form>
+    </dialog>
+    <dialog class="app-dialog" data-import-dialog aria-labelledby="import-dialog-title">
+      <form class="dialog-form" data-import-form>
+        <div class="dialog-heading"><div><p class="eyebrow">ROSTER IMPORT</p><h2 id="import-dialog-title">Bulk import students</h2></div><button class="dialog-close" type="button" aria-label="Close dialog" data-close-import-dialog>×</button></div>
+        <p class="dialog-description">Upload an Excel workbook with Name, Roll_Number, Email, Description, and Class columns. Blank Class cells use the selected class; named classes must match one of your active classes. Duplicate roll numbers are skipped.</p>
+        <label class="auth-field"><span>Class</span><select name="class_id" data-import-class required></select></label>
+        <label class="auth-field"><span>Excel file</span><input name="excel_file" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" data-import-file required></label>
+        <p class="class-form-error" data-import-message role="status" aria-live="polite" hidden></p>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-import-dialog>Cancel</button><button class="button button-primary" type="submit" data-import-submit>Import students</button></div>
       </form>
     </dialog>
     <div class="class-toast" data-student-toast role="status" aria-live="polite" hidden></div>

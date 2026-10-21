@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#142b4a">
+    <title>Reports · Attendify Pro</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" src="assets/js/app.js"></script>
+    <script type="module" src="js/reports.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <button class="sidebar-backdrop" type="button" aria-label="Close navigation" data-sidebar-close></button>
+      <aside class="sidebar" id="primary-navigation" aria-label="Primary navigation">
+        <a class="brand" href="dashboard.html" aria-label="Attendify Pro home"><span class="brand-mark" aria-hidden="true">A</span><span class="brand-copy"><strong>Attendify</strong><span>PRO</span></span></a>
+        <div class="workspace-switcher"><span class="workspace-avatar" id="workspace-avatar" aria-hidden="true">T</span><span class="workspace-copy"><strong id="workspace-teacher-name">Teacher</strong><span id="workspace-institution-name">School workspace</span></span><span class="workspace-chevron" aria-hidden="true">⌄</span></div>
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="primary-nav">
+          <a class="nav-link" href="dashboard.html" data-page="dashboard.html"><svg data-lucide="layout-grid" class="w-5 h-5 shrink-0"></svg><span>Dashboard</span></a>
+          <a class="nav-link" href="classes.html" data-page="classes.html"><svg data-lucide="book-open" class="w-5 h-5 shrink-0"></svg><span>Classes</span></a>
+          <a class="nav-link" href="students.html" data-page="students.html"><svg data-lucide="users" class="w-5 h-5 shrink-0"></svg><span>Students</span></a>
+          <a class="nav-link" href="attendance.html" data-page="attendance.html"><svg data-lucide="calendar-check" class="w-5 h-5 shrink-0"></svg><span>Attendance</span></a>
+          <a class="nav-link" href="reports.html" data-page="reports.html"><svg data-lucide="bar-chart-2" class="w-5 h-5 shrink-0"></svg><span>Reports</span></a>
+          <a class="nav-link" href="settings.html" data-page="settings.html"><svg data-lucide="settings" class="w-5 h-5 shrink-0"></svg><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-bottom"><a class="help-card" href="mailto:support@attendifypro.example"><span class="help-icon" aria-hidden="true">?</span><span><strong>Need a hand?</strong><small>Visit our help center</small></span><span class="help-arrow" aria-hidden="true">↗</span></a><button class="profile-button" type="button" data-sign-out title="Sign out"><span class="profile-avatar" aria-hidden="true" data-user-initials>…</span><span class="profile-copy"><strong data-user-name>Loading profile…</strong><small data-user-email></small></span><span class="profile-more" aria-hidden="true">↪</span></button></div>
+      </aside>
+      <main class="main-panel">
+        <header class="topbar"><button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false" data-sidebar-toggle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong>Reports</strong></div><div class="topbar-actions"><span class="today-label" data-current-date></span></div></header>
+        <div class="page-content">
+          <section class="page-heading"><div><p class="eyebrow">STUDENT ATTENDANCE</p><h1>Attendance summary</h1><p class="page-subtitle">Track attendance by class, subject, and date range.</p></div><div class="page-heading-actions"><button id="export-excel-btn" class="button button-primary" type="button" data-export-report disabled>Export to Excel</button></div></section>
+          <section class="report-filters card" aria-label="Attendance filters">
+            <label class="field-group"><span>Class</span><select name="class_id" data-report-class required><option value="">Loading classes…</option></select></label>
+            <label class="field-group"><span>Subject</span><select name="subject_id" data-report-subject disabled><option value="">Choose a class first</option></select></label>
+            <label class="field-group"><span>From</span><input type="date" name="date_from" data-report-from required></label>
+            <label class="field-group"><span>To</span><input type="date" name="date_to" data-report-to required></label>
+            <p class="attendance-target-note">Required attendance target: <strong data-report-threshold>75%</strong>. Students appear only when their active dates overlap the selected range.</p>
+          </section>
+          <section class="report-summary" aria-label="Report summary">
+            <div class="metric-chip"><span>Sessions held</span><strong data-report-sessions>—</strong></div>
+            <div class="metric-chip"><span>Students</span><strong data-report-students>—</strong></div>
+          </section>
+          <section class="card table-card report-table-card">
+            <div class="toolbar table-toolbar"><div class="toolbar-copy"><strong>Student attendance</strong><span class="muted" data-report-description>Choose a class and subject to view student attendance.</span></div></div>
+            <div class="table-scroll"><table class="report-table"><thead><tr><th scope="col">STUDENT</th><th scope="col">ROLL #</th><th class="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-emerald-700" scope="col">PRESENT</th><th class="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-rose-700" scope="col">ABSENT</th><th class="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-amber-700" scope="col">LEAVE</th><th scope="col">ATTENDANCE</th><th scope="col">ACTION</th></tr></thead><tbody data-report-rows><tr><td colspan="7" class="register-empty-cell">Choose a class, subject, and date range to view student attendance.</td></tr></tbody></table></div>
+          </section>
+          <div class="attendance-legend-bar" aria-label="Attendance target legend"><span><i class="legend-dot legend-above"></i> Above target (&gt; <span data-legend-target>75%</span>)</span><span><i class="legend-dot legend-equal"></i> Exactly on target (= <span data-legend-target>75%</span>)</span><span><i class="legend-dot legend-below"></i> Below target (&lt; <span data-legend-target>75%</span>)</span></div>
+        </div>
+      </main>
+    </div>
+    <dialog class="app-dialog report-calendar-dialog" data-report-calendar aria-labelledby="calendar-dialog-title">
+      <div class="calendar-dialog-content">
+        <header class="dialog-heading">
+          <div><p class="eyebrow">STUDENT ATTENDANCE</p><h2 id="calendar-dialog-title" data-calendar-student-name>Attendance calendar</h2></div>
+          <button class="dialog-close" type="button" data-calendar-close aria-label="Close calendar">&times;</button>
+        </header>
+        <p class="dialog-description">Roll number <strong data-calendar-roll-number>—</strong></p>
+        <section class="calendar-student-summary" aria-label="Student attendance summary">
+          <div><span>Total sessions</span><strong data-calendar-sessions>0</strong></div>
+          <div><span>Present</span><strong class="calendar-summary-present" data-calendar-present>0</strong></div>
+          <div><span>Absent</span><strong class="calendar-summary-absent" data-calendar-absent>0</strong></div>
+          <div><span>Leave</span><strong class="calendar-summary-leave" data-calendar-leave>0</strong></div>
+          <div><span>Attendance</span><strong data-calendar-percentage>0.0%</strong></div>
+        </section>
+        <section class="calendar-month-section" aria-label="Monthly attendance calendar">
+          <div class="calendar-month-toolbar">
+            <button class="calendar-month-button" type="button" data-calendar-previous aria-label="Previous month">&larr;</button>
+            <h3 data-calendar-month>Month</h3>
+            <button class="calendar-month-button" type="button" data-calendar-next aria-label="Next month">&rarr;</button>
+          </div>
+          <div class="attendance-calendar-grid" data-calendar-grid role="grid" aria-label="Student attendance by date"></div>
+          <div class="calendar-legend" aria-label="Calendar status legend">
+            <span><i class="legend-dot legend-present"></i>Present</span>
+            <span><i class="legend-dot legend-absent"></i>Absent</span>
+            <span><i class="legend-dot legend-leave"></i>Leave</span>
+            <span><i class="legend-dot legend-neutral"></i>No session / not marked</span>
+          </div>
+        </section>
+      </div>
+    </dialog>
+  </body>
+</html>

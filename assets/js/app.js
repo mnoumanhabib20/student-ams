@@ -23,6 +23,21 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") setSidebarOpen(false);
 });
 
+function initializeIcons() {
+  if (!window.lucide?.createIcons) {
+    console.error("Lucide icon library failed to load.");
+    return;
+  }
+
+  window.lucide.createIcons();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeIcons, { once: true });
+} else {
+  initializeIcons();
+}
+
 const pageName = window.location.pathname.split("/").pop() || "index.html";
 const currentPage = pageName === "dashboard.html" ? "index.html" : pageName;
 document.querySelectorAll(".nav-link[data-page]").forEach((link) => {
