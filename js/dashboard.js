@@ -17,9 +17,25 @@ const dashboard = {
   status: document.querySelector("[data-dashboard-status]"),
 };
 
+let dashboardDate = "";
+let midnightRefreshTimer = 0;
+
 function localDateValue(date = new Date()) {
   const offset = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function scheduleMidnightRefresh() {
+  window.clearTimeout(midnightRefreshTimer);
+  const now = new Date();
+  const nextMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+  );
+  midnightRefreshTimer = window.setTimeout(() => {
+    window.location.reload();
+  }, Math.max(0, nextMidnight.getTime() - now.getTime() + 100));
 }
 
 function formatCount(value) {
@@ -69,6 +85,8 @@ async function loadDashboard() {
 
   const date = new Date();
   const dateValue = localDateValue(date);
+  dashboardDate = dateValue;
+  scheduleMidnightRefresh();
   dashboard.date.textContent = new Intl.DateTimeFormat("en", {
     weekday: "long",
     month: "long",
@@ -234,4 +252,9 @@ function validateDashboard() {
 
 if (validateDashboard()) {
   void loadDashboard().catch(setDashboardUnavailable);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && localDateValue() !== dashboardDate) {
+      window.location.reload();
+    }
+  });
 }
